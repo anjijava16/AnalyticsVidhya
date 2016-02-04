@@ -1,4 +1,5 @@
 library("data.table")
+library("data.table")
 library("ggplot2")
 library("randomForest")
 library(caret)
@@ -10,13 +11,13 @@ test = read.csv("input/loan/test.csv",header=TRUE)
 
 fmt_test<-data.frame(Loan_Status=rep("N" ,nrow(test)),test[,]); 
 
-combined<-rbind(train,fmt_test)
+combined<-rbind(fmt_test,train)
 
 
 result<-combined[1:367,]
 print( nrow(result))
  
-result[which(result$ApplicantIncome>result$CoapplicantIncome),"Loan_Status"]<-'Y'
+result[which(result$ApplicantIncome>=result$CoapplicantIncome),"Loan_Status"]<-'Y'
 
  
 
@@ -24,4 +25,5 @@ output<-list(c(result["Loan_ID"],result["Loan_Status"]))
 
 
 write.csv(file="output.csv",output, row.names=F)
+ 
  
