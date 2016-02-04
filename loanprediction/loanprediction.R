@@ -24,6 +24,6 @@ result[which(result$ApplicantIncome>=result$CoapplicantIncome),"Loan_Status"]<-'
 output<-list(c(result["Loan_ID"],result["Loan_Status"]))
 
 
-write.csv(file="output.csv",output, row.names=F)
+write.csv(file="output.csv",output, row.names=F) 
  
  
