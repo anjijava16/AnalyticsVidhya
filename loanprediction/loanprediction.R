@@ -1,5 +1,4 @@
 library("data.table")
-library("data.table")
 library("ggplot2")
 library("randomForest")
 library(caret)
@@ -15,15 +14,31 @@ combined<-rbind(fmt_test,train)
 
 
 result<-combined[1:367,]
-print( nrow(result))
  
+
+result[which( is.na(result$LoanAmount)  ),'LoanAmount']<- 0
+#to check specific record whether value is updated
+#print(result[[9]][[80]])
+
+
+
 result[which(result$ApplicantIncome>=result$CoapplicantIncome),"Loan_Status"]<-'Y'
 
+result$LoanAmount <- as.integer(result$LoanAmount)
+
+
+
+#to check loan amount which is zero
+loanZero<-result[which(result$LoanAmount ==0 ),c("Loan_ID","Loan_Status","LoanAmount")]
+
+print (loanZero)
+#result[which(result$LoanAmount==0),"Loan_Status"]<-'Y'
+result[which(result$LoanAmount ==0),"Loan_Status"]<-'Y'
  
 
 output<-list(c(result["Loan_ID"],result["Loan_Status"]))
+#print (output)
 
 
-write.csv(file="output.csv",output, row.names=F) 
- 
+write.csv(file="output.csv",output, row.names=F)
  
