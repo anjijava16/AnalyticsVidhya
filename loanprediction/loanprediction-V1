@@ -1,0 +1,133 @@
+
+library("ggplot2")
+train= read.csv("input/loan/train.csv",header=TRUE)
+test = read.csv("input/loan/test.csv",header=TRUE)
+
+
+
+
+
+#combine the dataset(train and test) and also fomrat can done easily 
+#without duplication of code otherwise formatting need to be done in 
+#train and test.
+fmt_test<-data.frame(Loan_Status=rep("N" ,nrow(test)),test[,]); 
+combined<-rbind(fmt_test,train)
+
+###########################1.format the data.
+
+
+
+
+#1.Gender if have blank change to NS(Not specified)
+#since Gender is a factor change to character
+combined$Gender<-as.character(combined$Gender)
+#check whether it is changed from factor to character
+combined[combined$Gender=='','Gender']<-'NS'
+combined[is.nan(combined$Gender),'Gender']<-'NS'
+combined$Gender<-as.factor(combined$Gender)
+#factor(combined$Gender)
+
+
+
+
+#Note: if any column type is factor then it wont return NA if null only ""
+#e.g Married
+#2.Married 
+combined$Married<-as.character(combined$Married)
+#check whether it is changed from factor to character
+combined[combined$Married=='','Married']<-'NS'
+combined[is.nan(combined$Married),'Married']<-'NS'
+combined$Married<-as.factor(combined$Married)
+
+
+#3.Dependents
+combined$Dependents<-as.character(combined$Dependents)
+combined[combined$Dependents=='','Dependents'] <- 'NS'
+combined[combined$Dependents=='3+','Dependents'] <- '3'
+combined$Dependents<-as.factor(combined$Dependents)
+#unique(combined$Dependents)
+
+#str(combined$Dependents)
+#check whether it is changed from factor to character
+
+
+#4.Self_Employed
+
+combined$Self_Employed<-as.character(combined$Self_Employed)
+combined[combined$Self_Employed=='','Self_Employed'] <- 'NS'
+combined$Self_Employed<-as.factor(combined$Self_Employed)
+ 
+#unique(combined$Self_Employed)
+
+
+
+
+#6.LoanAmount
+
+
+combined[which( is.na(combined$LoanAmount)  ),'LoanAmount']<- 0
+combined[which(combined$ApplicantIncome>=combined$CoapplicantIncome),"Loan_Status"]<-'Y'
+combined$LoanAmount <- as.integer(combined$LoanAmount)
+
+
+#to check specific record whether value is updated
+#print(result[[9]][[80]])
+
+#############################2.generate formatted excel 
+
+write.csv(file="combined.csv",combined[368:981,], row.names=F)
+
+
+
+
+#############################3. Analyze data using train generated.
+#table(result$Gender,result$Loan_Status)
+#table(result$Gender,result$Loan_Status)
+train<-combined[368:981,]
+#to check loan amount which is zero
+Approved<-train[which(train$Loan_Status =='Y'
+),c("Loan_ID","Loan_Status","LoanAmount","Credit_History","Gender")]
+ 
+
+
+
+
+ggplot(Approved, aes(x =( Gender), fill = Loan_Status)) +
+  geom_histogram(width = 0.5) +
+  facet_wrap(~Loan_Status) + 
+  ggtitle("Approved") +
+  xlab("Gender") +
+  ylab("Loan Status") +
+  labs(fill = "Loan Approved")
+
+
+#To check which loan Amount on the approved loan
+quantile(Approved$LoanAmount , probs=c(0, 0.25, 0.5, 0.75, 1.0),na.rm=F)
+
+
+Approved$Gender <- as.integer( Approved$Gender)
+quantile(Approved$Gender , probs=c(0, 0.25, 0.5, 0.75, 1.0),na.rm=F)
+
+
+#table(result$Gender,result$Loan_Status)
+#############################4. predict the loan_status
+
+testresult<-combined[1:367,]# test data
+
+
+
+#print (loanZero)
+testresult[which(testresult$LoanAmount ==0),"Loan_Status"]<-'Y'
+testresult[which(testresult$LoanAmount>=700),"Loan_Status"]<-'Y'
+testresult[which(testresult$Gender %in% 'NS' ),"Loan_Status"]<-'Y'
+
+output<-list(c(testresult["Loan_ID"],testresult["Loan_Status"]))
+
+
+#############################5. predict the loan_status
+
+write.csv(file="output.csv",output, row.names=F)
+
+
+
+
