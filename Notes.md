@@ -20,3 +20,7 @@ NOTES:
   if it is non -factor you can change it easily
   =============================================
          df$column[which(is.nan(df$column)),'column']<-'Not specified'
+
+example:
+========
+http://www.analyticsvidhya.com/blog/2015/06/solution-kaggle-competition-bike-sharing-demand/
