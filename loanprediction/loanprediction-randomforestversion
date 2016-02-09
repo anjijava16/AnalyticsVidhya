@@ -1,7 +1,8 @@
-
+library(RCurl)
 library("ggplot2")
 train= read.csv("input/loan/train.csv",header=TRUE)
 test = read.csv("input/loan/test.csv",header=TRUE)
+
 
 printGraph<- function(Approved,Gender,Loan_Status){
 
@@ -96,9 +97,12 @@ write.csv(file="combined.csv",combined[368:981,], row.names=F)
 
 
 #############################3. Analyze data using train generated.
+combined$rank<- c(combined$ApplicantIncome)
+
 train<-combined[368:981,]
 test<-combined[1:367,]
-
+write.csv(file="train.csv",train, row.names=F)
+write.csv(file="test.csv",test, row.names=F)
 #to check loan amount which is zero
 Approved<-train[which(train$Loan_Status %in% c('Y')
 ),c("Loan_ID","Loan_Status","LoanAmount","Credit_History","Gender")]
@@ -110,38 +114,33 @@ Rejected<-train[which(train$Loan_Status %in% c('N')
 
 
 
+
+
 #printGraph(Approved,Gender,Loan_Status)
-counts <- table(Approved$Credit_History,Approved$Gender)
-#table(Approved$Credit_History,Approved$Gender)
 #To check which loan Amount on the approved loan
 #quantile(Approved$LoanAmount , probs=c(0, 0.25, 0.5, 0.75, 1.0),na.rm=F)
-
-
-Approved$Gender <- as.integer( Approved$Gender)
-#quantile(Approved$Gender , probs=c(0, 0.25, 0.5, 0.75, 1.0),na.rm=F)
-
 
 #############################4. predict the loan_status
 library(randomForest)
 
-set.seed(615)
-
-fit1 <- randomForest(
-Loan_Status ~ Gender+Married+Dependents+Education+ Self_Employed+ApplicantIncome +CoapplicantIncome+LoanAmount+
-Loan_Amount_Term+Credit_History+Property_Area, data=train,importance=TRUE, ntree=30)
 
 
-pred1=predict(fit1,test)
-test$Loan_Status=pred1
+set.seed(nrow(train))
+formula <- Loan_Status ~ Gender+Married+Dependents+Education+ Self_Employed+ApplicantIncome +CoapplicantIncome+LoanAmount+
+Loan_Amount_Term+Credit_History+Property_Area
+fit <- randomForest(formula,
+data=train,ntree=32,importance=TRUE,proximity=TRUE)
+pred=predict(fit,test)
+test$Loan_Status=pred
+  
 
- 
+trainset<- as.matrix(subset(test,test$Loan_Status=='Y'))
+#lm(formula,data=test,subset=trainset)
 
+trainset1<- as.matrix(subset(test,test$Loan_Status=='N'))
 
-#test[which(test$Gender %in% 'NS' ),"Loan_Status"]<-'Y'
 
 
 #############################6. Generate Output
-
-write.csv(file="output.csv",test, row.names=F)
-
+write.csv(file="output.csv",c(test["Loan_ID"],test["Loan_Status"]), row.names=F)
 
