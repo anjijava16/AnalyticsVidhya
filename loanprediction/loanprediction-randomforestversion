@@ -204,3 +204,4 @@ test$Loan_Status=pred
 #############################6. Generate Output
 write.csv(file="output.csv",c(test["Loan_ID"],test["Loan_Status"]), row.names=F)
 
+ 
