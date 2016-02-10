@@ -1,7 +1,7 @@
 library(RCurl)
 library("ggplot2")
-train= read.csv("input/loan/train.csv",header=TRUE)
-test = read.csv("input/loan/test.csv",header=TRUE)
+train= read.csv("loanprediction/input/train.csv",header=TRUE)
+test = read.csv("loanprediction/input/test.csv",header=TRUE)
 
 
 printGraph<- function(Approved,Gender,Loan_Status){
@@ -97,7 +97,7 @@ write.csv(file="combined.csv",combined[368:981,], row.names=F)
 
 
 #############################3. Analyze data using train generated.
-combined$rank<- c(combined$ApplicantIncome)
+#combined$rank<- c(combined$ApplicantIncome)
 
 train<-combined[368:981,]
 test<-combined[1:367,]
@@ -124,21 +124,81 @@ Rejected<-train[which(train$Loan_Status %in% c('N')
 library(randomForest)
 
 
+#filter <- train[which(train$Gender!='NS' & train$Dependents!=-1 & train$Self_Employed!='NS'),] 
+#train<- data.frame(filter)
+#write.csv(file="train.csv",trainf, row.names=F)
 
 set.seed(nrow(train))
 formula <- Loan_Status ~ Gender+Married+Dependents+Education+ Self_Employed+ApplicantIncome +CoapplicantIncome+LoanAmount+
 Loan_Amount_Term+Credit_History+Property_Area
-fit <- randomForest(formula,
-data=train,ntree=32,importance=TRUE,proximity=TRUE)
-pred=predict(fit,test)
+
+ 
+#formula <- Loan_Status ~ Loan_Amount_Term+Credit_History
+
+#replace<-TRUE
+#samplesize<-if(replace) nrow(train) else ceiling(.632*nrow(train))
+
+
+
+rf <- randomForest(formula,
+data=train,ntree=32,importance=TRUE,na.action=na.omit)
+pred=predict(rf,test)
 test$Loan_Status=pred
-  
 
-trainset<- as.matrix(subset(test,test$Loan_Status=='Y'))
-#lm(formula,data=test,subset=trainset)
+#red in below plot sales less than margin red is issue with the result
+#plot(margin(rf,test))
+#data(train, package="MASS")
 
-trainset1<- as.matrix(subset(test,test$Loan_Status=='N'))
+#tune.rf <- tuneRF(train[5],train[-5],stepFactor =0.5 )
+#print( tune.rf)
+#print(rf)
 
+
+
+
+
+
+
+#check the error rate.
+#===============
+#OUTPUT:
+#===============
+#Call:
+# randomForest(formula = formula, data = train, ntree = 32, importance = TRUE,      na.action = na.omit) 
+#               Type of random forest: classification
+#                     Number of trees: 32
+#No. of variables tried at each split: 3
+#        OOB estimate of  error rate: 27.2%
+#Confusion matrix:
+#   N   Y class.error
+#N 78 114   0.5937500
+#Y 53 369   0.1255924
+#===============
+#OUTPUT:
+#===============
+
+
+#rf1 <- randomForest(formula,
+#data=test,ntree=32,importance=TRUE,na.action=na.omit)
+#print("========================test")
+#print(rf1)
+
+
+#importance(rf)
+#varImpPlot(rf)
+
+
+#plot(margin(rf,test))
+
+
+#nrow(train)
+#table(predict(rf),train$Loan_Status)
+
+
+#margins.rf=margin(rf,train)
+#plot(margins.rf)
+#hist(margins.rf,main="Loan Acceptance")
+   
 
 
 #############################6. Generate Output
