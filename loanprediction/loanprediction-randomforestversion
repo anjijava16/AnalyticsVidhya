@@ -132,6 +132,7 @@ set.seed(nrow(train))
 formula <- Loan_Status ~ Gender+Married+Dependents+Education+ Self_Employed+ApplicantIncome +CoapplicantIncome+LoanAmount+
 Loan_Amount_Term+Credit_History+Property_Area
 
+
  
 #formula <- Loan_Status ~ Loan_Amount_Term+Credit_History
 
@@ -144,6 +145,8 @@ rf <- randomForest(formula,
 data=train,ntree=32,importance=TRUE,na.action=na.omit)
 pred=predict(rf,test)
 test$Loan_Status=pred
+
+
 
 #red in below plot sales less than margin red is issue with the result
 #plot(margin(rf,test))
@@ -204,4 +207,3 @@ test$Loan_Status=pred
 #############################6. Generate Output
 write.csv(file="output.csv",c(test["Loan_ID"],test["Loan_Status"]), row.names=F)
 
- 
