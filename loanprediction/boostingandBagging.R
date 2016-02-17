@@ -130,7 +130,9 @@ library(randomForest)
 #write.csv(file="train.csv",trainf, row.names=F)
 
 set.seed(nrow(train))
-formula <- Loan_Status ~ ApplicantIncome+Credit_History+Education+Married
+formula <- Loan_Status ~ Gender+Married+Dependents+Education+ Self_Employed+ApplicantIncome +CoapplicantIncome+LoanAmount+
+Loan_Amount_Term+Credit_History+Property_Area
+
 
  
 #formula <- Loan_Status ~ Loan_Amount_Term+Credit_History
@@ -163,13 +165,14 @@ library(adabag)
 #print(sub)
 
 
-nrow(train)
-bst<- boosting(formula, data=train, boos=TRUE,mfinal=100)
+
+bst<- boosting(formula, data=train, boos=TRUE,mfinal=4.95)
 importanceplot(bst)
 
-sub <- c( sample(1:200, 200), sample(201:400, 200), sample(401:614, 200) )
-bagresult <- bagging(formula, data=train[sub,], mfinal=100)
-pred<- predict.bagging(bagresult, newdata=test)
+sub <- c( sample(1:100, 100),sample(101:201, 100), sample(202:302, 100), sample(303:614, 311) )
+#bagresult <- bagging(formula, data=train[sub,], mfinal=100)
+#pred1<- predict.bagging(bagresult, newdata=test)
+pred<- predict.bagging(bst, newdata=test)
 test$Loan_Status<-pred$class
  
 
@@ -179,4 +182,6 @@ test$Loan_Status<-pred$class
 
 
 write.csv(file="output.csv",c(test["Loan_ID"],test["Loan_Status"]), row.names=F)
-#0.75 score 
+
+
+#result:Your score for this submission is : 0.770833333333. 
