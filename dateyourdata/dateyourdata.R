@@ -3,7 +3,7 @@
   train= read.csv("train.csv",header=TRUE)
   intern= read.csv("Internship.csv",header=TRUE)
   student= read.csv("Student.csv",header=TRUE)
-  
+  names(student)
   
   library(data.table)
   
@@ -12,13 +12,12 @@
   #head(train,10) 
   library(plyr)
   
-  data<-join(train, intern,by='Internship_ID',
+  traindata<-join(train, intern,by='Internship_ID',
              type = "left" )
   
   
-  data<-join(data, student,by='Student_ID',type = "left" )
-  nrow(data) 
-  areaofInterest<-c('UI',
+  studentdata<-join(traindata, student,by='Student_ID',type = "left" )
+   areaofInterest<-c('UI',
                'Marketing',
                'Media',
                'Social',
@@ -277,9 +276,9 @@
 
 totRow <-nrow(intern)
 totCol<-length(areaofInterest) 
-internIdMain <-c()
-interestMain<-c()
-countMain<-c()
+Internship_ID <-c()
+AreaOfinterest<-c()
+AreaInterestCount<-c()
 row<-1
 interest<-''
 while(row<=totRow )  {
@@ -287,9 +286,9 @@ while(row<=totRow )  {
   totcount<-0
    while(col<=totCol){
     colname<-areaofInterest[col]
-    data<-intern[row, colname]
-      if( !is.null(data) ){
-         if(data==1){
+    coldata<-intern[row, colname]
+      if( !is.null(coldata) ){
+         if(coldata==1){
               interest<- paste(colname,interest , sep=",",collapse = '')
               totcount<-totcount+1
         } 
@@ -297,34 +296,40 @@ while(row<=totRow )  {
      
     col<- col+1
   }
-  print(intern[row,1])
-  internIdMain[row]=intern[row,1]
+ # print(intern[row,1])
+  Internship_ID[row]=intern[row,1]
   result = substr(interest, 1, nchar(interest)-1)
-  interestMain[row]=result
-  print(totcount)
-  countMain[row]=totcount
+  AreaOfinterest[row]=result
+  #print(totcount)
+  AreaInterestCount[row]=totcount
   interest<-''
   row<- row+1 
 }
-print(interestMain)
- 
-dt<-data.table(internIdMain,interestMain,countMain)
-print(dt)
-  #AreaofInterests<-intern[]
-  print(length(dt$interestMain))
-  combined <- data[c('Student_ID','Internship_ID','Internship_Profile','Degree','hometown','Is_Part_Time'
-         ,'Stream',	'Current_year' ,'Earliest_Start_Date','Profile','Location','Start Date','End Date'
-          ,'Year_of_graduation','Performance_PG','Performance_UG'
-             ,'Performance_12th','Performance_10th','Experience_Type' 
+  
+AreaofInterestdata<-data.table(Internship_ID,AreaOfinterest,AreaInterestCount)
+dtinterest <-as.data.frame(AreaofInterestdata)
+
+result<-join(studentdata,dtinterest ,by='Internship_ID',
+           type = "left" )
+
+
+print(names(result))
+combined <- result[c('Student_ID','Internship_ID','Internship_Profile','Degree','hometown','Is_Part_Time',
+         'Stream',	'Current_year' ,
+        'Earliest_Start_Date',
+        'Profile','Location'
+        ,'Start.Date','End.Date'
+          ,'Year_of_graduation','Performance_PG','Performance_UG' 
+             ,'Performance_12th','Performance_10th','Experience_Type'
+             ,'AreaOfinterest','AreaInterestCount'
              ,'Expected_Stipend','Is_Shortlisted' )]
   
-  nrow(data) 
-  
+   
  # cbind(combined,dt)
 #  combined
   
  # table(combined$Is_Shortlisted)
-# test = write.csv(file = "data1.csv",combined)
+ test = write.csv(file = "data1.csv",combined)
   
   
   
