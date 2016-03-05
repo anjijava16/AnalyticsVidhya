@@ -76,6 +76,9 @@ formatcategorialVar<-function(df){
 
 imputeMissingValue<-function(df){
   
+  #KNN computes only for the numeric value not for the Char
+  #use KNN as such since 2 function similar name is there
+  #kNN imputation is correct function name
   library(VIM)
   
  df<- kNN(df,variable=c('Gender','Self_Employed','Married',
