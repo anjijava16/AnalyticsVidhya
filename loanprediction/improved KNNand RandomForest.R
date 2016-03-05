@@ -108,6 +108,7 @@ test<-combined[1:367,]
 
 ###########train data formatting
 train<-imputeMissingValue(train)
+train<-select(train,Loan_Status:Property_Area)
 colSums(is.na(train))
 
 train<-formatGender(train)
@@ -137,6 +138,8 @@ write.csv(file="fmttrain.csv",X_train, row.names=F)
 
 #################test
 test<-imputeMissingValue(test)
+test<-select(test,Loan_Status:Property_Area)
+
 test<-formatGender(test)
 test<-format(test)
 test<-formatcategorialVar(test)
