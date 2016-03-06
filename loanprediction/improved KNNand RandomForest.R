@@ -66,10 +66,10 @@ formatcategorialVar<-function(df){
   df[which(df$Self_Employed==''),'Self_Employed']<-'NS'
   df$Self_Employed<-as.factor(df$Self_Employed)
   
-  #Married
-  #df$Married<-as.character(df$Married)
-  #df[which(df$Married==''),'Married']<-'NS'
-  #df$Married<-as.factor(df$Married)
+#   Married
+#   df$Married<-as.character(df$Married)
+#   df[which(df$Married==''),'Married']<-'NS'
+#   df$Married<-as.factor(df$Married)
   
   return(df)
 }
@@ -79,8 +79,18 @@ imputeMissingValue<-function(df){
   #KNN computes only for the numeric value not for the Char
   #use KNN as such since 2 function similar name is there
   #kNN imputation is correct function name
+  #change non-numeric to numeric first and than impute
   library(VIM)
   
+  
+  df$Dependents<-as.integer(df$Dependents)
+  #df[df$Dependents=='','Dependents'] <- 'NA'
+  df[df$Dependents=='3+','Dependents'] <- '3'
+  df$Dependents<-as.factor(df$Dependents)
+  
+ df$Gender=as.integer(df$Gender)
+ df$Self_Employed=as.integer(df$Self_Employed)
+ df$Married=as.integer(df$Married)
  df<- kNN(df,variable=c('Gender','Self_Employed','Married',
                     'Credit_History','Loan_Amount_Term',
                     'LoanAmount','Dependents'))
@@ -111,18 +121,18 @@ train<-imputeMissingValue(train)
 train<-select(train,Loan_Status:Property_Area)
 colSums(is.na(train))
 
-train<-formatGender(train)
-train<-format(train)
-train<-formatcategorialVar(train)
+#train<-formatGender(train)
+#train<-format(train)
+#train<-formatcategorialVar(train)
 
 
 
 
-X_train<-train
-X_train<-subset(X_train, !(X_train$Gender=='NS'))
-X_train<-subset(X_train, !X_train$Self_Employed=='NS')
-X_train<-subset(X_train, !X_train$Married=='NS')
-X_train<-subset(X_train, !X_train$Dependents==-1)
+#X_train<-train
+#X_train<-subset(X_train, !(X_train$Gender=='NS'))
+#X_train<-subset(X_train, !X_train$Self_Employed=='NS')
+#X_train<-subset(X_train, !X_train$Married=='NS')
+#X_train<-subset(X_train, !X_train$Dependents==-1)
 
 
 #X_train<-subset(X_train, !(X_train$Credit_History==-1) )
@@ -134,22 +144,22 @@ X_train<-subset(X_train, !X_train$Dependents==-1)
 
 
 
-write.csv(file="fmttrain.csv",X_train, row.names=F)
+write.csv(file="fmttrain.csv",train, row.names=F)
 
 #################test
 test<-imputeMissingValue(test)
 test<-select(test,Loan_Status:Property_Area)
 
-test<-formatGender(test)
-test<-format(test)
-test<-formatcategorialVar(test)
+#test<-formatGender(test)
+#test<-format(test)
+#test<-formatcategorialVar(test)
 
-colSums(is.na(test))
-X_test<-test
-X_test<-subset(X_test, !(X_test$Gender=='NS'))
-X_test<-subset(X_test, !X_test$Self_Employed=='NS')
-X_test<-subset(X_test, !X_test$Married=='NS')
-X_test<-subset(X_test, !X_test$Dependents==-1)
+#colSums(is.na(test))
+#X_test<-test
+#X_test<-subset(X_test, !(X_test$Gender=='NS'))
+#X_test<-subset(X_test, !X_test$Self_Employed=='NS')
+#X_test<-subset(X_test, !X_test$Married=='NS')
+#X_test<-subset(X_test, !X_test$Dependents==-1)
 
 #X_test<-subset(X_test, !(X_test$Credit_History==-1) )
 #X_test<-subset(X_test, !(X_test$Loan_Amount_Term==-1))
@@ -159,7 +169,7 @@ X_test<-subset(X_test, !X_test$Dependents==-1)
 
 # colSums(is.na(test))
 
-write.csv(file="fmttest.csv",X_test, row.names=F)
+write.csv(file="fmttest.csv",test, row.names=F)
 
 
  
@@ -172,24 +182,23 @@ formula<-Loan_Status ~ Gender+Married+Dependents+Education+
   Self_Employed+ApplicantIncome +CoapplicantIncome+LoanAmount+
   Loan_Amount_Term+Credit_History+Property_Area
 
+#calculateMetrics(formula,X_train)
 
 
 
-
-fit <- randomForest(formula, data=X_train,importance=TRUE, ntree=38)
+fit <- randomForest(formula, data=train,importance=TRUE, ntree=38)
 
 
 print(nrow(X_test))
 print(nrow(X_train))
 #colSums(is.na(test))
-pred=predict(fit,X_test)
-X_test$Loan_Status=pred
+pred=predict(fit,test)
+test$Loan_Status=pred
 
 
 
 library(plyr)
-missing_test<-test
-result<-join(X_test,test,type="right",by="Loan_ID")
+#result<-join(X_test,test,type="right",by="Loan_ID")
 
 
  
@@ -199,6 +208,6 @@ nrow(test)-nrow(X_test)
 #result[is.na(result$Loan_Status),'Loan_Status']<-'Y'
 #############################6. Generate Output
 
-write.csv(file="output.csv",c(result['Loan_ID'],result['Loan_Status']), row.names=F)
+write.csv(file="output.csv",c(test['Loan_ID'],test['Loan_Status']), row.names=F)
 
 
