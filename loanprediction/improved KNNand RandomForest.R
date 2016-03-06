@@ -46,11 +46,45 @@ format<-function(df){
 calculateMetrics<-function(formula,df){
   library(Metrics)
   library(dplyr)
+  #since lm expect numeric dependent variable(response variable)
+  train$Loan_Status<-as.numeric(train$Loan_Status)
+  #removing Married since married is not factor
+  lm <- lm( log(Loan_Status ) ~., data =train)
   
-  linear_model <- lm(formula , data =df)
-  result<-rmse(train$Loan_Status, exp(linear_model$fitted.values))
- 
+ # cor(df$Loan_Status,df$Married)
+  #confidence level
+  #confint(lm)
+ # abline(lm)
+ return( summary(lm))
   
+  #Multiple R-squared:  0.3451,	Adjusted R-squared:  0.3265 
+  
+  
+  #result<-rmse(train$Loan_Status,(exp(linear_model$fitted.values)))
+  #result
+   #plot(lm)
+  #dont return unless return it wont change the original value
+  
+   
+  library(rpart)
+  library(e1071)
+   library(rpart.plot)
+   library(caret)
+  
+  #setting the tree control parameters
+   fitControl <- trainControl(method = "cv", number = 5)
+   cartGrid <- expand.grid(.cp=(1:50)*0.01)
+   formula<-Loan_Status ~ Gender+Married+Dependents+Education+ 
+     Self_Employed+ApplicantIncome +CoapplicantIncome+LoanAmount+
+     Loan_Amount_Term+Credit_History+Property_Area
+   
+
+   
+  #decision tree
+    #tree_model <- train(formula, data = train, method = "rpart",
+    #                    trControl = fitControl, tuneGrid = cartGrid)
+      #summary(tree_model)
+  #plot(tree_model)
 }
 
 formatcategorialVar<-function(df){
@@ -65,35 +99,42 @@ formatcategorialVar<-function(df){
   df$Self_Employed<-as.character(df$Self_Employed)
   df[which(df$Self_Employed==''),'Self_Employed']<-'NS'
   df$Self_Employed<-as.factor(df$Self_Employed)
-  
-#   Married
-#   df$Married<-as.character(df$Married)
-#   df[which(df$Married==''),'Married']<-'NS'
-#   df$Married<-as.factor(df$Married)
+
   
   return(df)
 }
 
 imputeMissingValue<-function(df){
   
-  #KNN computes only for the numeric value not for the Char
-  #use KNN as such since 2 function similar name is there
-  #kNN imputation is correct function name
-  #change non-numeric to numeric first and than impute
-  library(VIM)
+ #KNN computes only for the numeric value not for the Char
+ #use KNN as such since 2 function similar name is there
+ #kNN imputation is correct function name
+ #change non-numeric to numeric first and than impute
+ library(VIM)
   
   
-  df$Dependents<-as.integer(df$Dependents)
-  #df[df$Dependents=='','Dependents'] <- 'NA'
-  df[df$Dependents=='3+','Dependents'] <- '3'
-  df$Dependents<-as.factor(df$Dependents)
+ df$Dependents<-as.integer(df$Dependents)
+ df[df$Dependents=='3+','Dependents'] <- '3'
+ df$Dependents<-as.factor(df$Dependents)
   
  df$Gender=as.integer(df$Gender)
+ df$Gender=as.factor(df$Gender)
+ 
+ 
  df$Self_Employed=as.integer(df$Self_Employed)
+ df$Self_Employed=as.factor(df$Self_Employed)
+ 
  df$Married=as.integer(df$Married)
+ #since test does not have '' showing error when
+ #predicting ,hence commented 
+ #Error when uncommented:"Type of predictors in new data do not match that of the training data"
+ #df$Married=as.factor(df$Married)
+ 
+ df$CoapplicantIncome <- as.integer( df$CoapplicantIncome)
+ 
  df<- kNN(df,variable=c('Gender','Self_Employed','Married',
                     'Credit_History','Loan_Amount_Term',
-                    'LoanAmount','Dependents'))
+                    'LoanAmount','Dependents','CoapplicantIncome'))
   
   return(df)
 }
@@ -119,57 +160,16 @@ test<-combined[1:367,]
 ###########train data formatting
 train<-imputeMissingValue(train)
 train<-select(train,Loan_Status:Property_Area)
-colSums(is.na(train))
-
-#train<-formatGender(train)
-#train<-format(train)
-#train<-formatcategorialVar(train)
-
-
-
-
-#X_train<-train
-#X_train<-subset(X_train, !(X_train$Gender=='NS'))
-#X_train<-subset(X_train, !X_train$Self_Employed=='NS')
-#X_train<-subset(X_train, !X_train$Married=='NS')
-#X_train<-subset(X_train, !X_train$Dependents==-1)
-
-
-#X_train<-subset(X_train, !(X_train$Credit_History==-1) )
-#X_train<-subset(X_train, !(X_train$Loan_Amount_Term==-1))
-#X_train<-subset(X_train, !(X_train$LoanAmount==-1))
-
-
-
-
-
-
-write.csv(file="fmttrain.csv",train, row.names=F)
+#colSums(is.na(train))
+#write.csv(file="fmttrain.csv",train, row.names=F)
 
 #################test
 test<-imputeMissingValue(test)
 test<-select(test,Loan_Status:Property_Area)
 
-#test<-formatGender(test)
-#test<-format(test)
-#test<-formatcategorialVar(test)
-
-#colSums(is.na(test))
-#X_test<-test
-#X_test<-subset(X_test, !(X_test$Gender=='NS'))
-#X_test<-subset(X_test, !X_test$Self_Employed=='NS')
-#X_test<-subset(X_test, !X_test$Married=='NS')
-#X_test<-subset(X_test, !X_test$Dependents==-1)
-
-#X_test<-subset(X_test, !(X_test$Credit_History==-1) )
-#X_test<-subset(X_test, !(X_test$Loan_Amount_Term==-1))
-#X_test<-subset(X_test, !(X_test$LoanAmount==-1))
-
-
-
 # colSums(is.na(test))
 
-write.csv(file="fmttest.csv",test, row.names=F)
+#write.csv(file="fmttest.csv",test, row.names=F)
 
 
  
@@ -177,35 +177,21 @@ write.csv(file="fmttest.csv",test, row.names=F)
  #############################4. predict the loan_status
 
 library(randomForest)
+
 set.seed(615)
 formula<-Loan_Status ~ Gender+Married+Dependents+Education+ 
   Self_Employed+ApplicantIncome +CoapplicantIncome+LoanAmount+
   Loan_Amount_Term+Credit_History+Property_Area
 
-#calculateMetrics(formula,X_train)
-
-
-
+calculateMetrics(formula,train)
 fit <- randomForest(formula, data=train,importance=TRUE, ntree=38)
-
-
-print(nrow(X_test))
-print(nrow(X_train))
+#varImpPlot(fit)
 #colSums(is.na(test))
 pred=predict(fit,test)
 test$Loan_Status=pred
-
-
-
-library(plyr)
-#result<-join(X_test,test,type="right",by="Loan_ID")
-
-
+#check no of Y and N
+table(pred, test$Loan_Status)
  
-nrow(X_test)
-nrow(result)
-nrow(test)-nrow(X_test)
-#result[is.na(result$Loan_Status),'Loan_Status']<-'Y'
 #############################6. Generate Output
 
 write.csv(file="output.csv",c(test['Loan_ID'],test['Loan_Status']), row.names=F)
