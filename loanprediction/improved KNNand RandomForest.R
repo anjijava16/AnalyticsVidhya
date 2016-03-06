@@ -60,7 +60,7 @@ calculateMetrics<-function(formula,df){
   #Multiple R-squared:  0.3451,	Adjusted R-squared:  0.3265 
   
   
-  #result<-rmse(train$Loan_Status,(exp(linear_model$fitted.values)))
+  result<-rmse(train$Loan_Status,(exp(lm$fitted.values)))
   #result
    #plot(lm)
   #dont return unless return it wont change the original value
@@ -104,6 +104,26 @@ formatcategorialVar<-function(df){
   return(df)
 }
 
+changeNumericToCatgeorialVar<-function(df){
+  #df<-train
+   
+  #df$ApplicantIncome<-cut(df$ApplicantIncome,breaks=c(0,1000,5000,10000,50000,90000),
+  #labels=c(1,2,3,4,5 ),right=FALSE)
+ 
+ #df$CoapplicantIncome<-cut(df$CoapplicantIncome,breaks=c(0,1,1000,5000,50000,90000),
+  #labels=c(1,2,3,4,5),right=FALSE)
+  
+  #train$LoanAmount<-as.integer(train$LoanAmount)
+  #df$LoanAmount<-cut(df$LoanAmount,breaks=c(0,100,500,1000),labels=c(1,2,3),right=FALSE)
+ # train$ApplicantIncome<-as.integer(train$ApplicantIncome)
+  #df$ApplicantIncome<-cut(train$ApplicantIncome,breaks=c(0,100,200,500),labels=c(1,2,3),right=FALSE)
+  #df[which(df$CoapplicantIncome==0),'CoapplicantIncome']<- min(df$CoapplicantIncome)
+   
+ 
+ 
+  return (df)
+}
+
 imputeMissingValue<-function(df){
   
  #KNN computes only for the numeric value not for the Char
@@ -111,6 +131,9 @@ imputeMissingValue<-function(df){
  #kNN imputation is correct function name
  #change non-numeric to numeric first and than impute
  library(VIM)
+  
+  
+  
   
   
  df$Dependents<-as.integer(df$Dependents)
@@ -125,6 +148,7 @@ imputeMissingValue<-function(df){
  df$Self_Employed=as.factor(df$Self_Employed)
  
  df$Married=as.integer(df$Married)
+ # df$Credit_History<-as.factor(df$Credit_History)
  #since test does not have '' showing error when
  #predicting ,hence commented 
  #Error when uncommented:"Type of predictors in new data do not match that of the training data"
@@ -153,19 +177,23 @@ combined<-rbind(fmt_test,train)
 ###train
 
 train<-combined[368:981,]
+train$total<-train$ApplicantIncome	+train$CoapplicantIncome
+
 test<-combined[1:367,]
 
-
+test$total<-test$ApplicantIncome+test$CoapplicantIncome
 
 ###########train data formatting
 train<-imputeMissingValue(train)
 train<-select(train,Loan_Status:Property_Area)
+train<-changeNumericToCatgeorialVar(train)
 #colSums(is.na(train))
-#write.csv(file="fmttrain.csv",train, row.names=F)
+write.csv(file="fmttrain.csv",train, row.names=F)
 
 #################test
 test<-imputeMissingValue(test)
 test<-select(test,Loan_Status:Property_Area)
+test<-changeNumericToCatgeorialVar(test)
 
 # colSums(is.na(test))
 
@@ -174,16 +202,17 @@ test<-select(test,Loan_Status:Property_Area)
 
  
 
- #############################4. predict the loan_status
+ #############################4.predict the loan_status
 
 library(randomForest)
-
+str(train)
+str(test)
 set.seed(615)
 formula<-Loan_Status ~ Gender+Married+Dependents+Education+ 
   Self_Employed+ApplicantIncome +CoapplicantIncome+LoanAmount+
   Loan_Amount_Term+Credit_History+Property_Area
 
-calculateMetrics(formula,train)
+#calculateMetrics(formula,train)
 fit <- randomForest(formula, data=train,importance=TRUE, ntree=38)
 #varImpPlot(fit)
 #colSums(is.na(test))
@@ -195,5 +224,6 @@ table(pred, test$Loan_Status)
 #############################6. Generate Output
 
 write.csv(file="output.csv",c(test['Loan_ID'],test['Loan_Status']), row.names=F)
+
 
 
