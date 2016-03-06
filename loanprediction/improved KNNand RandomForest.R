@@ -177,11 +177,11 @@ combined<-rbind(fmt_test,train)
 ###train
 
 train<-combined[368:981,]
-train$total<-train$ApplicantIncome	+train$CoapplicantIncome
+#train$total<-train$ApplicantIncome	+train$CoapplicantIncome
 
 test<-combined[1:367,]
 
-test$total<-test$ApplicantIncome+test$CoapplicantIncome
+#test$total<-test$ApplicantIncome+test$CoapplicantIncome
 
 ###########train data formatting
 train<-imputeMissingValue(train)
