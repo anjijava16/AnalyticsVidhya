@@ -226,4 +226,5 @@ table(pred, test$Loan_Status)
 write.csv(file="output.csv",c(test['Loan_ID'],test['Loan_Status']), row.names=F)
 
 
+#0.805555555556(27)
 
