@@ -277,3 +277,4 @@ if(mongo.is.connected(mongo) == TRUE) {
   
   write.csv(file="output.csv",c(test['Loan_ID'],test['Loan_Status']), row.names=F)
 }
+#Your score for this submission is : 0.777777777778. Your leaderboard score is : 0.777777777778
