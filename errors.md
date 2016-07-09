@@ -35,3 +35,28 @@ As you can see Loan_id become factor which is like unique a primary key column s
 with below fixed my issue. !!!!
 train$Loan_ID= as.integer(train$Loan_ID)
 test$Loan_ID= as.integer(test$Loan_ID)
+
+
+2.ERROR   unused argument (Loan_Status:Property_Area)
+=====================================================
+
+This error occurs when using dplyr
+
+Solution:
+============
+To check this error check ?select or help(select) which are the packages loaded 
+As you can see from below output it try to use MASS and dplyr package and hence result
+in collision of method in both package.
+
+SO solution restart the session R and then remove MASS if not needed or use package specific
+call like test<-dplyr::select(test,Loan_Status:Property_Area)
+
+
+output
+======
+Help on topic 'select' was found in the following packages:
+
+Ridge Regression
+(in package MASS in library C:/Program Files/R/R-3.2.3/library)
+Select/rename variables by name.
+(in package dplyr in library C:/Users/admin/Documents/R/win-library/3.2)
