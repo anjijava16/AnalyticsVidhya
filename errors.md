@@ -33,8 +33,8 @@ solutions:
 
 As you can see Loan_id become factor which is like unique a primary key column so change to integer 
 with below fixed my issue. !!!!
-train$Loan_ID= as.integer(train$Loan_ID)
-test$Loan_ID= as.integer(test$Loan_ID)
+train$Loan_ID= as.character(train$Loan_ID)
+test$Loan_ID= as.character(test$Loan_ID)
 
 
 2.ERROR   unused argument (Loan_Status:Property_Area)
@@ -60,3 +60,18 @@ Ridge Regression
 (in package MASS in library C:/Program Files/R/R-3.2.3/library)
 Select/rename variables by name.
 (in package dplyr in library C:/Users/admin/Documents/R/win-library/3.2)
+
+
+
+ERROR 3: KNN Imputation
+=======================
+Warning messages:
+1: In kNN_work(data, variable, metric, k, dist_var, weights, numFun,  :
+  Nothing to impute, because no NA are present (also after using makeNA)
+2: In kNN_work(data, variable, metric, k, dist_var, weights, numFun,  :
+  The following TRUE/FALSE imputation status variables will be updated: Gender_imp , Self_Employed_imp , Married_imp , Credit_History_imp , Loan_Amount_Term_imp , LoanAmount_imp , CoapplicantIncome_imp
+
+solution:
+=========
+this occurs if you run r 2 times since if it is null value already computed , if you run again
+shows above error. so restart R and try.
