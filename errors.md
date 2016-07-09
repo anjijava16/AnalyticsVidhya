@@ -75,3 +75,36 @@ solution:
 =========
 this occurs if you run r 2 times since if it is null value already computed , if you run again
 shows above error. so restart R and try.
+
+
+ERROR :NA/NAN/INF -NAs introduced by coercion:
+=============================================
+Error in randomForest.default(m, y, ...) : 
+  NA/NaN/Inf in foreign function call (arg 1)
+
+Solutions:
+==========
+
+Reason random forest needs 
+
+In general,there are 2 main reasons you get this error message:
+
+1.If the data frame contains a character vector column instead of factors. Just convert your character column to a factor
+2.If the data contains bad values, applying random forest will also generate this error.
+
+In my class Loan_id cannot be changed to factor since it is unique - if in case changed "Can not handle categorical predictors with more than 53 categories will be shown" hence removed Loan_id from the formula fixed !!! 
+
+str(train)
+str(test)
+set.seed(615)
+train$Loan_ID= as.character(train$Loan_ID)
+test$Loan_ID= as.character(test$Loan_ID)
+formula<-Loan_Status ~ Gender+Married+Dependents+Education+ 
+  Self_Employed+ApplicantIncome +CoapplicantIncome+LoanAmount+
+  Loan_Amount_Term+Credit_History+Property_Area
+fit <- randomForest(as.factor(Loan_Status) ~ . -(Loan_ID), data=train,importance=TRUE, ntree=500)
+
+print(fit)
+pred=predict(fit,test)
+test$Loan_Status=pred
+
