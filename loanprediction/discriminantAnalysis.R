@@ -80,3 +80,5 @@ test$Loan_Status=pred$class
 write.csv(file="output.csv",c(test['Loan_ID'],test['Loan_Status']), row.names=F)
 #Random Forest      :Your score for this submission is : 0.805555555556. Your leaderboard score is : 0.805555555556
 #Logistic regression:Your score for this submission is : 0.791666666667. Your leaderboard score is : 0.805555555556
+#Discriminant Analysis:Your score for this submission is : 0.777777777778. Your leaderboard score is : 0.805555555556
+
